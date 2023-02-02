@@ -1,0 +1,93 @@
+<div tabindex="0" (blur)="onTouched()" (mouseleave)="CogId = '';listVisible = false;rowId = '';closeSpaceCog()" id="myDIV"   class="multiselect-dropdown" (clickOutside)="closeDropdown();">
+  <div [class.disabled]="disabled">
+    <!-- [ngStyle]="{'--base-width':  LabelWidth + 'px' }" -->
+    <span tabindex="-1" style="pointer-events: auto;display: flex; justify-content: space-between;" (click)="collapseExpand()" class="dropdown-btn" [ngClass]="{ 'white-normal': expandCarret && disabled != false }"  [title]="!CogId ? titleValue ? titleValue : createTitle() : ''" (click)="toggleDropdown($event)">
+      <span *ngIf="selectedItems.length == 0">{{_placeholder}}</span>      
+      <!-- [ngClass]="{'wrap':expandCarret}" -->
+      <div class="flex_hidden wrap " [ngClass]="{'visible' : listVisible}" id="flex_{{msId}}"  #TextWidth [ngStyle]="{'height':expandCarret && disabled != false ? '100%' : '17px', 'width': selectedItems.length > 0 ? '100%' : 'auto' }" >
+        <span *ngFor="let item of selectedItems; trackBy: trackByFn;let k = index" class="selected-item-container" [ngStyle]="{display:item.showCog ? 'flex !important' : 'block !important' }">
+          <!-- [hidden]="k  > itemsShowLimit" -->
+        <div id="item_{{msId}}_{{k}}"  [ngClass]="{ 'd_flex': item.showCog}" >
+        <span (click)="onCogClick($event,item)" style="margin: 0px 12px 5px 0px;"  *ngIf="item.showCog">
+          <span (click)="onCogClick($event,item)" [ngStyle]="{ color: item?.recordState == 'Active' ? '#4b809b' : 'red' }" class="glyphicon glyphicon-cog" [title]="!CogId ? selectedItems[k].titleValue?.trim(';') ? selectedItems[k].titleValue?.trim(';') : createTitle() : ''"></span>
+          <div *ngIf="CogId== item.id" class="dropdown row-menu" style="position: absolute;" >
+            <ul class="dropdown-menu row-menu" style="left: 18px !important; top: -5px;display:block" >
+              <li *ngIf="item.recordState == 'Active'" >
+                <a (click)="updateCogSate($event, 'Archived',item)">Archive</a >
+              </li>
+              <li *ngIf="item.recordState == 'Archived'">
+                <a (click)="updateCogSate($event, 'Active',item)">Restore</a >
+              </li>
+              <li>
+                <a (click)="updateCogSate($event, 'Audit Log',item)">Audit Log</a>
+              </li>
+            </ul>
+          </div>
+        </span>
+        <!-- <span class="selected-item"  [hidden]="k  > itemsShowLimit">
+           <span *ngIf="item.hyper != null && item.hyper != '' && item.hyper != undefined  " (click)="updateCogSate($event, 'HyperLink',item)" title="{{item.text}}">
+             <a style="text-decoration: underline !important; color: #337ab7 !important"> {{item.text}}</a>
+            </span>
+           <span *ngIf="item.hyper == null || item.hyper == ''" title="{{item.text}}">{{item.text}}</span>
+           <span *ngIf="selectedItems.length-1 !=  k" style="color:#555">;&nbsp;</span>
+        </span> -->
+
+
+        <span class="selected-item"   [hidden]="k  > itemsShowLimit" >
+           <span *ngIf="item.hyper != null && item.hyper != '' && item.hyper != undefined  " (click)="updateCogSate($event, 'HyperLink',item)" title="{{item.text}}">
+             <a style="text-decoration: underline !important; color: #337ab7 !important"> {{item.text}}<span *ngIf="selectedItems.length-1 !=  k && itemsShowLimit != 1" style="color:#555">;&nbsp;</span></a>
+            </span>
+           <span *ngIf="item.hyper == null || item.hyper == ''" title="{{item.text}}">{{item.text}}<span *ngIf="selectedItems.length-1 !=  k && itemsShowLimit != 1" style="color:#555">;&nbsp;</span></span>
+                   </span>
+                  </div>
+                  <div *ngIf="showAblelLable.length == 1 && (firstItemWidth == flex_width || (firstItemWidth+12) == flex_width) && !expandCarret" style="white-space: nowrap;">...</div>
+      </span>
+    </div>
+
+    <!-- <div style="line-height: 0;"></div> -->
+      <span [ngClass]="{ 'dropdown-multiselect--active': _settings.defaultOpen }" style="display: flex;">
+        <!-- /{{_data.length}} -->
+        <span >
+        <span class="remaining-count" style="white-space: nowrap;
+        padding: 0px 0px 0 5px !important;
+        position: inherit;
+        height: fit-content;" *ngIf="(selectedItems.length - showAblelLable.length) > 0 && !expandCarret"> +{{selectedItems.length - showAblelLable.length}}</span>
+        </span>
+        <!-- <span style="padding-right: 15px !important;" *ngIf="itemShowRemaining()>0">+{{itemShowRemaining()}}</span> -->
+        <!-- <span style="padding-right: 30px !important;" class="arrow-btn open" *ngIf="itemShowRemaining()>0" (click)="changeItemshow()" ></span> -->
+
+        <!-- <span style="padding-right: 15px !important; font-size: 25px;" *ngIf="itemsShowLimit == (_settings.itemsShowLimit + itemShowRemaining)" (click)="changeItemshow()" >&#752;</span> -->
+        <!-- <div style="padding-right: 30px !important; font-size: 25px;" class="arrow-btn" *ngIf="itemsShowLimit == (_settings.itemsShowLimit + itemShowRemaining)" (click)="changeItemshow()" ></div> -->
+        <span class="dropdown-multiselect__caret" style="    margin: 0;
+        display: block;
+        padding: 12px 0 10px;
+        height: fit-content;
+        position: inherit;
+        " ></span>
+      </span>
+    </span>
+  </div>
+  <div class="dropdown-list" [hidden]="!_settings.defaultOpen || disabled != false" >
+    <ul class="item1" *ngIf="!disabled">
+      <li (click)="toggleSelectAll()" *ngIf="(_data.length > 0 || _settings.allowRemoteDataSearch) && !_settings.singleSelection && _settings.enableCheckAll && _settings.limitSelection===-1" class="multiselect-item-checkbox" style="border-bottom: 1px solid #ccc;padding:10px">
+        <input type="checkbox" aria-label="multiselect-select-all" [checked]="isAllItemsSelected()" [disabled]="disabled || isLimitSelectionReached()" />
+        <div>{{!isAllItemsSelected() ? _settings.selectAllText : _settings.unSelectAllText}}</div>
+      </li>
+      <li class="filter-textbox" *ngIf="(_data.length>0 || _settings.allowRemoteDataSearch) && _settings.allowSearchFilter">
+        <input type="text" aria-label="multiselect-search" [readOnly]="disabled" [placeholder]="_settings.searchPlaceholderText" [(ngModel)]="filter.text" (ngModelChange)="onFilterTextChange($event)">
+      </li>
+    </ul>
+    <ul class="item2" [style.maxHeight]="_settings.maxHeight+'px'" *ngFor="let item of _data | multiSelectFilter:filter; let i = index;">
+      <li  (click)="onItemClick(item)" class="multiselect-item-checkbox" *ngIf="disabled ? isSelected(item) : true">
+        <input type="checkbox" [attr.aria-label]="item.text" [checked]="isSelected(item)" [disabled]="disabled || (isLimitSelectionReached() && !isSelected(item)) || item.isDisabled" />
+        <div>{{item.text}}</div>
+      </li>
+      <li class='no-filtered-data' *ngIf="_data.length != 0 && (_data | multiSelectFilter:filter).length == 0 && !_settings.allowRemoteDataSearch">
+        <h5>{{_settings.noFilteredDataAvailablePlaceholderText}}</h5>
+      </li>
+      <li class='no-data' *ngIf="_data.length == 0 && !_settings.allowRemoteDataSearch">
+        <h5>{{_settings.noDataAvailablePlaceholderText}}</h5>
+      </li>
+    </ul>
+  </div>
+</div>
